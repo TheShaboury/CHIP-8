@@ -81,134 +81,209 @@ void Chip8::OP_00E0() {
 	memset(video, 0, sizeof(video));
 }
 
-void OP_00EE() {
+void Chip8::OP_00EE() {
+	sp--;
+	pc = stack[sp];
+}
+
+void Chip8::OP_1nnn() {
+	uint16_t address = opcode & 0x0FFFu;
+	pc = address;
+}
+
+void Chip8::OP_2nnn() {
+	stack[sp] = pc;
+	sp++;
+	uint16_t address = opcode & 0x0FFFu;
+	pc = address;
+}
+
+void Chip8::OP_3xkk() {
+	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+	uint8_t byte = opcode & 0x00FFu;
+
+	if (registers[Vx] == byte) {
+		pc += 2;
+	}
+}
+
+void Chip8::OP_4xkk() {
+	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+	uint8_t byte = opcode & 0x00FFu;
+
+	if (registers[Vx] != byte) {
+		pc += 2;
+	}
+}
+
+void Chip8::OP_5xy0() {
+	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+	uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+
+	if (registers[Vx] == registers[Vy]) {
+		pc += 2;
+	}
+}
+
+void Chip8::OP_6xkk() {
+	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+	uint8_t byte = opcode & 0x00FFu;
+	registers[Vx] = byte;
+}
+
+void Chip8::OP_7xkk() {
+	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+	uint8_t byte = opcode & 0x00FFu;
+	registers[Vx] += byte;
+}
+
+void Chip8::OP_8xy0() {
+	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+	uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+	registers[Vx] = registers[Vy];
+}
+
+void Chip8::OP_8xy1() {
+	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+	uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+	registers[Vx] |= registers[Vy];
+}
+
+void Chip8::OP_8xy2() {
+	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+	uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+	registers[Vx] &= registers[Vy];
+}
+
+void Chip8::OP_8xy3() {
+	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+	uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+	registers[Vx] ^= registers[Vy];
+}
+
+void Chip8::OP_8xy4() {
+	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+	uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+	uint16_t sum = registers[Vx] + registers[Vy];
+	registers[Vx] = (sum & 0xFF);
+
+	if (sum > 255U) {
+		registers[0xF] = 1;
+	}
+	else {
+		registers[0xF] = 0;
+	}
+}
+
+void Chip8::OP_8xy5() {
+	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+	uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+
+	if (registers[Vx] > registers[Vy]) {
+		registers[0xF] = 1;
+	}
+	else {
+		registers[0xF] = 0;
+	}
+
+	registers[Vx] -= registers[Vy];
+}
+
+void Chip8::OP_8xy6() {
+	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+	registers[0xF] = (registers[Vx] & 0x1u);
+	registers[Vx] >>= 1;
+}
+
+void Chip8::OP_8xy7() {
+	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+	uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+
+	if (registers[Vy] > registers[Vx]) {
+		registers[0xF] = 1;
+	}
+	else {
+		registers[0xF] = 0;
+	}
+
+	registers[Vx] = registers[Vy] - registers[Vx];
+}
+
+void Chip8::OP_8xyE() {
+	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+	registers[0xF] = (registers[Vx] & 0x80u) >> 7u;
+	registers[Vx] <<= 1;
+}
+
+void Chip8::OP_9xy0() {
+	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+	uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+
+	if (registers[Vx] != registers[Vy]) {
+		pc += 2;
+	}
+}
+
+void Chip8::OP_Annn() {
+	uint16_t address = (opcode & 0x0FFFu);
+	index = address;
+}
+
+void Chip8::OP_Bnnn() {
+	uint16_t address = (opcode & 0x0FFFu);
+	pc = address + registers[0];
+}
+
+void Chip8::OP_Cxkk() {
+	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+	uint8_t byte = (opcode & 0x00FFu);
+	registers[Vx] = randByte(randGen) & byte;
+}
+
+void Chip8::OP_Dxyn() {
 
 }
 
-void OP_1nnn() {
+void Chip8::OP_Ex9E() {
 
 }
 
-void OP_2nnn() {
+void Chip8::OP_ExA1() {
 
 }
 
-void OP_3xkk() {
+void Chip8::OP_Fx07() {
 
 }
 
-void OP_4xkk() {
+void Chip8::OP_Fx0A() {
 
 }
 
-void OP_5xy0() {
+void Chip8::OP_Fx15() {
 
 }
 
-void OP_6xkk() {
+void Chip8::OP_Fx18() {
 
 }
 
-void OP_7xkk() {
+void Chip8::OP_Fx1E() {
 
 }
 
-void OP_8xy0() {
+void Chip8::OP_Fx29() {
 
 }
 
-void OP_8xy1() {
+void Chip8::OP_Fx33() {
 
 }
 
-void OP_8xy2() {
+void Chip8::OP_Fx55() {
 
 }
 
-void OP_8xy3() {
-
-}
-
-void OP_8xy4() {
-
-}
-
-void OP_8xy5() {
-
-}
-
-void OP_8xy6() {
-
-}
-
-void OP_8xy7() {
-
-}
-
-void OP_8xyE() {
-
-}
-
-void OP_9xy0() {
-
-}
-
-void OP_Annn() {
-
-}
-
-void OP_Bnnn() {
-
-}
-
-void OP_Cxkk() {
-
-}
-
-void OP_Dxyn() {
-
-}
-
-void OP_Ex9E() {
-
-}
-
-void OP_ExA1() {
-
-}
-
-void OP_Fx07() {
-
-}
-
-void OP_Fx0A() {
-
-}
-
-void OP_Fx15() {
-
-}
-
-void OP_Fx18() {
-
-}
-
-void OP_Fx1E() {
-
-}
-
-void OP_Fx29() {
-
-}
-
-void OP_Fx33() {
-
-}
-
-void OP_Fx55() {
-
-}
-
-void OP_Fx65() {
+void Chip8::OP_Fx65() {
 
 }
