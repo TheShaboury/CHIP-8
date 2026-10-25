@@ -20,6 +20,9 @@ public:
 
 private:
 
+	// NULL: Do nothing
+	void OP_NULL();
+
 	// 00E0 - CLS: Clear the display
 	void OP_00E0();
 
@@ -122,6 +125,12 @@ private:
 	// Fx65 - LD Vx, [I]: Read registers V0 through Vx from memory starting at location I
 	void OP_Fx65();
 
+	// The sub-tables functions
+	void Table0();
+	void Table8();
+	void TableE();
+	void TableF();
+
 	uint8_t registers[REGISTER_COUNT]{};
 	uint8_t memory[MEMORY_SIZE]{};
 	uint16_t index{};
@@ -134,4 +143,11 @@ private:
 
 	std::default_random_engine randGen;
 	std::uniform_int_distribution<uint8_t> randByte;
+
+	typedef void (Chip8::* Chip8Function)();
+	Chip8Function table[0x10];
+	Chip8Function table0[0xF];
+	Chip8Function table8[0xF];
+	Chip8Function tableE[0xF];
+	Chip8Function tableF[0x66];
 };
