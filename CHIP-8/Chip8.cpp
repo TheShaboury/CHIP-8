@@ -49,7 +49,7 @@ Chip8::Chip8()
 	}
 
 	// Initialize the RNG
-	randByte = std::uniform_int_distribution<uint8_t>(0, 255U);
+	randByte = std::uniform_int_distribution<int>(0, 255U);
 
 	// Function pointer table
 	table[0x0] = &Chip8::Table0;	// Goes to the sub-table (0)
@@ -70,7 +70,7 @@ Chip8::Chip8()
 	table[0xF] = &Chip8::TableF;	// Goes to the sub-table (F)
 
 	// Directing all of the non-defined instructions to the OP_NULL intruction for sub-tables (0, 8, E)
-	for (uint8_t i; i <= 0xE; i++) {
+	for (uint8_t i = 0; i <= 0xE; i++) {
 		table0[i] = &Chip8::OP_NULL;
 		table8[i] = &Chip8::OP_NULL;
 		tableE[i] = &Chip8::OP_NULL;
@@ -414,7 +414,7 @@ void Chip8::OP_Fx29() {
 }
 
 void Chip8::OP_Fx33() {
-	uint8_t Vx = (opcode * 0x0F00u) >> 8u;
+	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
 	uint8_t value = registers[Vx];
 
 	// Ones
